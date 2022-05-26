@@ -9,15 +9,15 @@ lazy val `bacscan` =
     .settings(name := "bacscan")
     .settings(commonSettings)
     .settings(dependencies)
-    .dependsOn(codeHouseBacnet4jWrapper)
+    .settings(libraryDependencies ++= bacnetDependencies)
 
-lazy val codeHouseBacnet4jWrapper = {
-  lazy val projectName = "bacnet4j-wrapper"
-  lazy val branch = "sraster"
-  lazy val repoUri = uri(s"https://github.com/Code-House/bacnet4j-wrapper.git#$branch")
-  // lazy val repoUri = uri("git@github.com:Code-House/bacnet4j-wrapper.git#master")
-  ProjectRef(repoUri, projectName)
-}
+// lazy val codeHouseBacnet4jWrapper = {
+//   lazy val projectName = "bacnet4j-wrapper"
+//   lazy val branch = "sraster"
+//   lazy val repoUri = uri(s"https://github.com/Code-House/bacnet4j-wrapper.git#$branch")
+//   // lazy val repoUri = uri("git@github.com:Code-House/bacnet4j-wrapper.git#master")
+//   ProjectRef(repoUri, projectName)
+// }
 
 lazy val commonSettings =
   compilerPlugins ++ commonScalacOptions ++ Seq(
@@ -42,6 +42,15 @@ lazy val commonScalacOptions = Seq(
     (Compile / console / scalacOptions).value,
 )
 
+ThisBuild / resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository"
+val BACNET4J_VERSION = "1.2.2-SNAPSHOT"
+lazy val bacnetDependencies = Seq(
+  "org.code-house.bacnet4j" % "api"              % BACNET4J_VERSION,
+  "org.code-house.bacnet4j" % "ip"               % BACNET4J_VERSION,
+  "org.code-house.bacnet4j" % "mstp"             % BACNET4J_VERSION,
+  "org.code-house.bacnet4j" % "bacnet4j-wrapper" % BACNET4J_VERSION
+)
+
 lazy val dependencies = Seq(
   libraryDependencies ++= Seq(
     // main dependencies
@@ -51,6 +60,6 @@ lazy val dependencies = Seq(
     org.scalacheck.scalacheck,
     org.scalatest.scalatest,
     org.scalatestplus.`scalacheck-1-16`,
-    org.typelevel.`discipline-scalatest`,
+    org.typelevel.`discipline-scalatest`
   ).map(_ % Test),
 )

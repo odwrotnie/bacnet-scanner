@@ -1,26 +1,40 @@
 package app.instap.bacscan
 
 object Main {
-
   val ARG_IP_ADDRESS = "ip"
   val ARG_BROADCAST = "broadcast"
+  val ARG_DEVICE_ID = "device"
   val ARG_TIMEOUT = "timeout"
 
-  val usage = """
-    Usage: sliding [--arg1 num] [--arg2 num] [--filename filename]
-  """
+  private val usage =
+    s"Usage: java -jar bacscan.jar" +
+      s" --$ARG_IP_ADDRESS ip" +
+      s" --$ARG_BROADCAST broadcast" +
+      s" --$ARG_DEVICE_ID device" +
+      s" --$ARG_TIMEOUT timeout"
 
   def main(args: Array[String]): Unit =
-    if (args.isEmpty || args.length % 2 != 0)
-      println(usage)
+    if (args.length == 0) println(usage)
     else {
-      val argMap = Map.newBuilder[String, Any]
-      args.sliding(2, 2).toList.collect {
-        case Array("--arg1", arg1: String) => argMap.+=("arg1" -> arg1)
-        case Array("--arg2", arg2: String) => argMap.+=("arg2" -> arg2)
-        case Array("--filename", filename: String) =>
-          argMap.+=("filename" -> filename)
-      }
-      println(argMap.result())
+      val options = nextArg(Map(), args.toList)
+      println(options)
+    }
+
+  private def nextArg(map: Map[String, Any], list: List[String]): Map[String, Any] =
+    list match {
+      case Nil => map
+      case s"--$ARG_IP_ADDRESS" :: value :: tail =>
+        nextArg(map ++ Map(ARG_IP_ADDRESS -> value), tail)
+      case s"--$ARG_BROADCAST" :: value :: tail =>
+        nextArg(map ++ Map(ARG_BROADCAST -> value), tail)
+      case s"--$ARG_DEVICE_ID" :: value :: tail =>
+        nextArg(map ++ Map(ARG_DEVICE_ID -> value.toInt), tail)
+      case s"--$ARG_TIMEOUT" :: value :: tail =>
+        nextArg(map ++ Map(ARG_TIMEOUT -> value.toInt), tail)
+      case string :: Nil =>
+        nextArg(map ++ Map("filename" -> string), list.tail)
+      case unknown :: _ =>
+        println("Unknown option " + unknown)
+        throw new IllegalArgumentException
     }
 }

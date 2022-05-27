@@ -17,6 +17,9 @@ object Main {
     if (args.length == 0) println(usage)
     else {
       val options = nextArg(Map(), args.toList)
+      options foreach {
+        case (k, v) => println(s" - $k -> $v")
+      }
       println(options)
     }
 

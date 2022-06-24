@@ -10,9 +10,14 @@ final case class Client(
     deviceId: Int,
     timeout: Int,
   ) {
+
   private val converter = new BypassBacnetConverter()
   private val client = new BacNetIpClient(ip, broadcast, deviceId)
+
+  println(s"Starting the Client - $this")
+
   client.start()
+
   client.discoverDevices(timeout).asScala foreach { device =>
     println(device)
     client.getDeviceProperties(device).asScala foreach { property =>

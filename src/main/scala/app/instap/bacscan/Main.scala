@@ -21,11 +21,16 @@ object Main {
         case (k, v) => println(s" - $k: $v")
       }
       println(options)
+      val ip = options.get(ARG_IP_ADDRESS).get
+      val broadcast = options.get(ARG_BROADCAST).get
+      val deviceId = options.get(ARG_DEVICE_ID).get.toInt
+      val timeout = options.get(ARG_TIMEOUT).get.toInt
+      val c = Client.apply(ip = ip, broadcast = broadcast, deviceId = deviceId, timeout = timeout)
     }
 
-  private def nextArg(map: Map[String, Any], list: List[String]): Map[String, Any] =
+  private def nextArg(map: Map[String, Any], list: List[String]): Map[String, String] =
     list match {
-      case Nil => map
+      case Nil => map.view.mapValues(_.toString).toMap
       case s"--$ARG_IP_ADDRESS" :: value :: tail =>
         nextArg(map ++ Map(ARG_IP_ADDRESS -> value), tail)
       case s"--$ARG_BROADCAST" :: value :: tail =>

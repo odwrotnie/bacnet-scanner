@@ -10,6 +10,9 @@ lazy val `bacscan` =
     .settings(commonSettings)
     .settings(dependencies)
     .settings(libraryDependencies ++= bacnetDependencies)
+    .settings(
+      assembly / assemblyJarName := "bacscan.jar"
+    )
 
 // lazy val codeHouseBacnet4jWrapper = {
 //   lazy val projectName = "bacnet4j-wrapper"

@@ -13,20 +13,47 @@ object Main {
       s" --$ARG_DEVICE_ID device" +
       s" --$ARG_TIMEOUT timeout"
 
-  def main(args: Array[String]): Unit =
+  def main(args: Array[String]): Unit = {
+
     if (args.length == 0) println(usage)
     else {
       val options = nextArg(Map(), args.toList)
       options foreach {
         case (k, v) => println(s" - $k: $v")
       }
-      println(options)
+
       val ip = options.get(ARG_IP_ADDRESS).get
       val broadcast = options.get(ARG_BROADCAST).get
       val deviceId = options.get(ARG_DEVICE_ID).get.toInt
       val timeout = options.get(ARG_TIMEOUT).get.toInt
+
+      val csv = new CSV("bacscan.csv",
+        "property-name", "property-id", "property-type", "property-units",
+        "device-id", "device-name", "device-network", "device-address", "device-vendor", "device-model",
+        "value")
       val c = Client.apply(ip = ip, broadcast = broadcast, deviceId = deviceId, timeout = timeout)
+      c.start()
+      c.stream.foreach {
+        case (dd, pd, value) =>
+          println(s"Device data: $dd, property data: $pd, value: $value")
+          csv.write(Map(
+            "device-id" -> dd.id.getOrElse(""),
+            "device-name" -> dd.name.getOrElse(""),
+            "device-network" -> dd.network.getOrElse(""),
+            "device-address" -> dd.address.getOrElse(""),
+            "device-vendor" -> dd.vendor.getOrElse(""),
+            "device-model" -> dd.model.getOrElse(""),
+            "property-id" -> pd.id.getOrElse(""),
+            "property-name" -> pd.name.getOrElse(""),
+            "property-type" -> pd.tpe.getOrElse(""),
+            "property-units" -> pd.units.getOrElse(""),
+            "value" -> value
+          ))
+      }
+      c.stop()
+      csv.close()
     }
+  }
 
   private def nextArg(map: Map[String, Any], list: List[String]): Map[String, String] =
     list match {
